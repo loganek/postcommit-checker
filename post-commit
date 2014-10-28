@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# message subject's regex
+MSG_REGEX=^github#[0-9]+
+
+# repository regex
+REPO_REGEX=github\.com
+
+# warning message
+WARN_MSG="!!! Your commit message doesn't match a pattern: $MSG_REGEX !!!
+!!!       You can fix it, just $ git commit --amend      !!!"
+
+MSG=$(git log -1 --pretty=%s)
+IFS='/' read -a UPSTREAM_REF <<< $(git rev-parse --symbolic-full-name --abbrev-ref @{u})
+REPO=$(git remote -v | grep ${UPSTREAM_REF[0]} | grep push | awk '{print $2}')
+
+if [[ $REPO =~ $REPO_REGEX && ! $MSG =~ $MSG_REGEX ]]; then
+   echo "$WARN_MSG"
+fi
